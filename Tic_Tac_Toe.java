@@ -4,7 +4,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 
-public class Tic_Tac_Toe {
+public class Tic_Tac_Toe implements KeyListener {
     int boardWidth = 600;
     int boardHeight= 650;
 
@@ -21,6 +21,7 @@ public class Tic_Tac_Toe {
     String currentPlayer = playerX;
 
     boolean  gameOver = false;
+    int turns = 0;
     Tic_Tac_Toe(){
         frame.setVisible(true);
         frame.setSize(boardWidth,boardHeight);
@@ -60,8 +61,9 @@ public class Tic_Tac_Toe {
                     public void actionPerformed(ActionEvent e) {
                         if(gameOver) return;
                         JButton tile = (JButton) e.getSource();
-                        if(tile.getText()==""){
+                        if(tile.getText().isEmpty()){
                             tile.setText(currentPlayer);
+                            turns++;
                             checkWinner();
                             if(!gameOver){
                                 currentPlayer = currentPlayer == playerX ? playerO : playerX;
@@ -73,15 +75,118 @@ public class Tic_Tac_Toe {
                 });
             }
         }
+
+        frame.addKeyListener(this);
+        frame.setFocusable(true);
+        frame.requestFocusInWindow();
     }
 
     void checkWinner(){
+        //horizontal
        for(int i=0;i<3;i++){
-           if(board[i][0].getText() == "") continue;
-           if(board[i][0].getText() == board[i][1].getText() && board[i][1].getText() == board[i][2].getText()){
+           if(board[i][0].getText().isEmpty()) continue;
+           if(board[i][0].getText().equals(board[i][1].getText()) &&
+               board[i][1].getText().equals(board[i][2].getText())){
+               for(int j=0;j<3;j++){
+                   setWinner(board[i][j]);
+               }
                gameOver = true;
                return;
            }
        }
+       //vertical
+       for(int i=0;i<3;i++){
+           if(board[0][i].getText().isEmpty()) continue;
+           if(board[0][i].getText().equals(board[1][i].getText()) &&
+           board[1][i].getText().equals(board[2][i].getText())){
+               for(int j=0;j<3;j++){
+                   setWinner(board[j][i]);
+               }
+               gameOver = true;
+               return;
+           }
+       }
+
+       //diagonal
+        if(board[0][0].getText().equals(board[1][1].getText()) &&
+            board[1][1].getText().equals(board[2][2].getText()) &&
+            !board[0][0].getText().isEmpty()){
+                for(int i=0;i<3;i++){
+                    setWinner(board[i][i]);
+                }
+                gameOver = true;
+                return;
+        }
+
+        //anti-diagonal
+        if(board[0][2].getText().equals(board[1][1].getText()) &&
+            board[1][1].getText().equals(board[2][0].getText()) &&
+            !board[0][2].getText().isEmpty()){
+            setWinner(board[0][2]);
+            setWinner(board[1][1]);
+            setWinner(board[2][0]);
+            gameOver = true;
+            return;
+        }
+
+        //draw logic
+        if(turns == 9){
+            for(int i=0;i<3;i++){
+                for(int j=0;j<3;j++){
+                    setTile(board[i][j]);
+                }
+            }
+            gameOver = true;
+            return;
+        }
+    }
+
+
+    //winner logic
+    void setWinner(JButton tile){
+        tile.setForeground(Color.green);
+        tile.setBackground(Color.gray);
+        textLable.setText(currentPlayer+ " is the winner");
+    }
+
+    void setTile(JButton tile){
+        tile.setForeground(Color.orange);
+        tile.setBackground(Color.gray);
+        textLable.setText("Its a draw");
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(e.getKeyCode() == KeyEvent.VK_SPACE){
+            if(gameOver){
+               resetGame();
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
+    }
+
+
+    void resetGame(){
+        currentPlayer = playerX;
+        textLable.setText("TIC-TAC-TOE");
+        gameOver=false;
+        turns = 0;
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j].setText("");
+                board[i][j].setBackground(Color.darkGray);
+                board[i][j].setForeground(Color.white);
+            }
+        }
     }
 }
